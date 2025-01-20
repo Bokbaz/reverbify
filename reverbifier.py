@@ -2,7 +2,6 @@ import os
 import subprocess
 import numpy as np
 from pydub import AudioSegment
-from pydub.utils import which
 from pydub.effects import speedup, low_pass_filter
 import librosa
 import soundfile as sf
@@ -15,7 +14,7 @@ ffmpeg_path = ffmpeg_lib.get_ffmpeg_exe()
 
 # Explicitly set paths for ffmpeg and ffprobe
 AudioSegment.converter = ffmpeg_path
-AudioSegment.ffprobe = ffmpeg_path  # Point ffprobe to the same binary
+AudioSegment.ffprobe = ffmpeg_path  # Use ffmpeg binary as a fallback for ffprobe
 
 st.title("Video to Audio Processor with Reverb and Pitch Shifting")
 
