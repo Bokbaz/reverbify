@@ -24,7 +24,7 @@ st.title("Video to Audio Processor with Reverb and Pitch Shifting")
 
 # Function to download audio using yt-dlp
 def download_audio(video_url):
-    output_file = "video_audio.mp3"
+    output_file = "video_audio"
     ydl_opts = {
         "format": "bestaudio/best",
         "outtmpl": output_file,
