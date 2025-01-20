@@ -2,12 +2,12 @@ import os
 import subprocess
 import numpy as np
 from pydub import AudioSegment
-from pydub.utils import which
 from pydub.effects import speedup, low_pass_filter
 import librosa
 import soundfile as sf
 import streamlit as st
 import imageio_ffmpeg as ffmpeg_lib
+import yt_dlp  # Explicit import of yt-dlp
 
 # Get FFmpeg path from imageio_ffmpeg
 ffmpeg_path = ffmpeg_lib.get_ffmpeg_exe()
@@ -19,7 +19,7 @@ st.title("Video to Audio Processor with Reverb and Pitch Shifting")
 
 # Function to download audio using yt-dlp
 def download_audio(video_url):
-    output_file = "video_audio.%(ext)s"
+    output_file = "video_audio.mp3"
     ydl_opts = {
         "format": "bestaudio/best",
         "outtmpl": output_file,
@@ -31,15 +31,12 @@ def download_audio(video_url):
             }
         ],
     }
-    with subprocess.Popen(
-        ["yt-dlp", "--no-warnings", "-o", output_file, "-x", "--audio-format", "mp3", video_url],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    ) as process:
-        stdout, stderr = process.communicate()
-        if process.returncode != 0:
-            raise RuntimeError(f"yt-dlp failed: {stderr.decode()}")
-        return "video_audio.mp3"
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([video_url])
+        return output_file
+    except Exception as e:
+        raise RuntimeError(f"yt-dlp failed: {e}")
 
 # Input for video URL
 video_url = st.text_input("Enter YouTube video URL:")
@@ -47,23 +44,23 @@ video_url = st.text_input("Enter YouTube video URL:")
 if video_url:
     st.write("Processing the video...")
     try:
-        # Download video audio using yt-dlp
+        # Step 1: Download video audio using yt-dlp
         audio_file = download_audio(video_url)
 
-        # Load the audio with pydub
+        # Step 2: Load the audio with pydub
         audio = AudioSegment.from_file(audio_file)
 
-        # Step 1: Slow down to 0.8x speed
+        # Step 3: Slow down to 0.8x speed
         audio = speedup(audio, playback_speed=0.8)
 
-        # Step 2: Apply a low-pass filter
+        # Step 4: Apply a low-pass filter
         audio = low_pass_filter(audio, cutoff=3000)
 
         # Export intermediate audio for further processing
         intermediate_file = "intermediate_audio.wav"
         audio.export(intermediate_file, format="wav")
 
-        # Step 3: Add reverb and pitch shift using librosa
+        # Step 5: Add reverb and pitch shift using librosa
         y, sr = librosa.load(intermediate_file, sr=None)
 
         # Apply pitch shifting (down by 1 semitone)
