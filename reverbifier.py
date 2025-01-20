@@ -30,6 +30,7 @@ def download_audio(video_url):
                 "preferredquality": "192",
             }
         ],
+        "ffmpeg_location": ffmpeg_path,  # Set FFmpeg path for yt-dlp
         "http_headers": {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
         },
