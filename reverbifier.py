@@ -2,6 +2,7 @@ import os
 import subprocess
 import numpy as np
 from pydub import AudioSegment
+from pydub.utils import which
 from pydub.effects import speedup, low_pass_filter
 import librosa
 import soundfile as sf
@@ -12,8 +13,9 @@ import yt_dlp  # Ensure yt-dlp is imported
 # Get FFmpeg path from imageio_ffmpeg
 ffmpeg_path = ffmpeg_lib.get_ffmpeg_exe()
 
-# Set FFmpeg path explicitly for pydub
+# Explicitly set paths for ffmpeg and ffprobe
 AudioSegment.converter = ffmpeg_path
+AudioSegment.ffprobe = ffmpeg_path  # Point ffprobe to the same binary
 
 st.title("Video to Audio Processor with Reverb and Pitch Shifting")
 
