@@ -2,7 +2,6 @@ import os
 import subprocess
 import numpy as np
 from pydub import AudioSegment
-from pydub.utils import which
 from pydub.effects import speedup, low_pass_filter
 import librosa
 import soundfile as sf
@@ -15,7 +14,7 @@ ffmpeg_path = ffmpeg_lib.get_ffmpeg_exe()
 
 # Explicitly set paths for ffmpeg and ffprobe
 AudioSegment.converter = ffmpeg_path
-AudioSegment.ffprobe = ffmpeg_path  # Use FFmpeg binary as a fallback for ffprobe
+AudioSegment.ffprobe = ffmpeg_path  # Ensure ffprobe points to the correct binary
 
 # Add ffmpeg and ffprobe paths to environment variables
 os.environ["FFMPEG"] = ffmpeg_path
@@ -45,6 +44,9 @@ def download_audio(video_url):
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([video_url])
+        # Handle double `.mp3` extension
+        if os.path.exists(f"{output_file}.mp3"):
+            os.rename(f"{output_file}.mp3", output_file)
         return output_file
     except Exception as e:
         raise RuntimeError(f"yt-dlp failed: {e}")
