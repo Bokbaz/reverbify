@@ -2,6 +2,7 @@ import os
 import subprocess
 import numpy as np
 from pydub import AudioSegment
+from pydub.utils import which
 from pydub.effects import speedup, low_pass_filter
 import librosa
 import soundfile as sf
@@ -24,7 +25,7 @@ st.title("Video to Audio Processor with Reverb and Pitch Shifting")
 
 # Function to download audio using yt-dlp
 def download_audio(video_url):
-    output_file = "video_audio"
+    output_file = "video_audio.mp3"
     ydl_opts = {
         "format": "bestaudio/best",
         "outtmpl": output_file,
@@ -44,9 +45,6 @@ def download_audio(video_url):
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([video_url])
-        # Handle double `.mp3.mp3` extension added by yt-dlp
-        if os.path.exists(f"{output_file}.mp3"):
-            os.rename(f"{output_file}.mp3", output_file)
         return output_file
     except Exception as e:
         raise RuntimeError(f"yt-dlp failed: {e}")
