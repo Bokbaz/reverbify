@@ -19,6 +19,7 @@ AudioSegment.ffprobe = ffmpeg_path  # Ensure ffprobe points to the correct binar
 # Add ffmpeg and ffprobe paths to environment variables
 os.environ["FFMPEG"] = ffmpeg_path
 os.environ["FFPROBE"] = ffmpeg_path
+os.environ["PATH"] += os.pathsep + os.path.dirname(ffmpeg_path)
 
 st.title("Video to Audio Processor with Reverb and Pitch Shifting")
 
