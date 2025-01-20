@@ -2,7 +2,6 @@ import os
 import subprocess
 import numpy as np
 from pydub import AudioSegment
-from pydub.utils import which
 from pydub.effects import speedup, low_pass_filter
 import librosa
 import soundfile as sf
@@ -45,7 +44,9 @@ def download_audio(video_url):
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([video_url])
-        return output_file
+        # Adjust the file name if yt-dlp appends an extra extension
+        final_output = output_file if os.path.exists(output_file) else f"{output_file}.mp3"
+        return final_output
     except Exception as e:
         raise RuntimeError(f"yt-dlp failed: {e}")
 
