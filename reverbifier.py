@@ -7,7 +7,7 @@ import librosa
 import soundfile as sf
 import streamlit as st
 import imageio_ffmpeg as ffmpeg_lib
-import yt_dlp  # Explicit import of yt-dlp
+import yt_dlp  # Ensure yt-dlp is imported
 
 # Get FFmpeg path from imageio_ffmpeg
 ffmpeg_path = ffmpeg_lib.get_ffmpeg_exe()
@@ -30,6 +30,10 @@ def download_audio(video_url):
                 "preferredquality": "192",
             }
         ],
+        "http_headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        },
+        "verbose": True,  # Enable verbose logging for debugging
     }
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
