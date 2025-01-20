@@ -61,7 +61,8 @@ if video_url:
         audio_file = download_audio(video_url)
 
         # Step 2: Load the audio with pydub
-        audio = AudioSegment.from_file(audio_file)
+        # Explicitly set ffprobe and ffmpeg paths during loading
+        audio = AudioSegment.from_file(audio_file, ffmpeg=ffmpeg_path)
 
         # Step 3: Slow down to 0.8x speed
         audio = speedup(audio, playback_speed=0.8)
