@@ -1,7 +1,8 @@
+streamlit
 pydub
-librosa==0.8.0
+librosa
 soundfile
 numpy
-streamlit
 imageio_ffmpeg
 yt-dlp
+setuptools
