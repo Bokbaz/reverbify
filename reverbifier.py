@@ -7,7 +7,7 @@ import librosa
 import soundfile as sf
 import streamlit as st
 import imageio_ffmpeg as ffmpeg_lib
-import yt_dlp  # Ensure yt-dlp is imported
+import yt_dlp
 
 # Get FFmpeg path from imageio_ffmpeg
 ffmpeg_path = ffmpeg_lib.get_ffmpeg_exe()
@@ -44,9 +44,10 @@ def download_audio(video_url):
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([video_url])
-        # Adjust the file name if yt-dlp appends an extra extension
-        final_output = output_file if os.path.exists(output_file) else f"{output_file}.mp3"
-        return final_output
+        # Handle double `.mp3.mp3` extension added by yt-dlp
+        if os.path.exists(f"{output_file}.mp3"):
+            os.rename(f"{output_file}.mp3", output_file)
+        return output_file
     except Exception as e:
         raise RuntimeError(f"yt-dlp failed: {e}")
 
@@ -106,10 +107,14 @@ if video_url:
             )
 
         # Clean up temporary files
-        os.remove(audio_file)
-        os.remove(intermediate_file)
-        os.remove(final_audio_file)
-        os.remove(final_mp3)
+        if os.path.exists(audio_file):
+            os.remove(audio_file)
+        if os.path.exists(intermediate_file):
+            os.remove(intermediate_file)
+        if os.path.exists(final_audio_file):
+            os.remove(final_audio_file)
+        if os.path.exists(final_mp3):
+            os.remove(final_mp3)
 
     except Exception as e:
         st.error(f"An error occurred: {e}")
