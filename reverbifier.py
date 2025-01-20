@@ -7,20 +7,39 @@ from pydub.effects import speedup, low_pass_filter
 import librosa
 import soundfile as sf
 import streamlit as st
-from pytube import YouTube
 import imageio_ffmpeg as ffmpeg_lib
 
 # Get FFmpeg path from imageio_ffmpeg
 ffmpeg_path = ffmpeg_lib.get_ffmpeg_exe()
 
-# Debugging: Check FFmpeg path
-if not os.path.isfile(ffmpeg_path):
-    raise RuntimeError(f"FFmpeg binary not found at {ffmpeg_path}")
-
 # Set FFmpeg path explicitly for pydub
 AudioSegment.converter = ffmpeg_path
 
 st.title("Video to Audio Processor with Reverb and Pitch Shifting")
+
+# Function to download audio using yt-dlp
+def download_audio(video_url):
+    output_file = "video_audio.%(ext)s"
+    ydl_opts = {
+        "format": "bestaudio/best",
+        "outtmpl": output_file,
+        "postprocessors": [
+            {
+                "key": "FFmpegExtractAudio",
+                "preferredcodec": "mp3",
+                "preferredquality": "192",
+            }
+        ],
+    }
+    with subprocess.Popen(
+        ["yt-dlp", "--no-warnings", "-o", output_file, "-x", "--audio-format", "mp3", video_url],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    ) as process:
+        stdout, stderr = process.communicate()
+        if process.returncode != 0:
+            raise RuntimeError(f"yt-dlp failed: {stderr.decode()}")
+        return "video_audio.mp3"
 
 # Input for video URL
 video_url = st.text_input("Enter YouTube video URL:")
@@ -28,19 +47,8 @@ video_url = st.text_input("Enter YouTube video URL:")
 if video_url:
     st.write("Processing the video...")
     try:
-        # Download video audio using pytube
-        yt = YouTube(video_url)
-        video_stream = yt.streams.filter(only_audio=True).first()
-        output_file = video_stream.download(filename="video_audio")
-
-        # Convert to MP3 using FFmpeg from imageio_ffmpeg
-        audio_file = "output_raw.mp3"
-        subprocess.run(
-            [ffmpeg_path, "-i", output_file, audio_file, "-y"],
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
+        # Download video audio using yt-dlp
+        audio_file = download_audio(video_url)
 
         # Load the audio with pydub
         audio = AudioSegment.from_file(audio_file)
@@ -89,13 +97,10 @@ if video_url:
             )
 
         # Clean up temporary files
-        os.remove("video_audio")
         os.remove(audio_file)
         os.remove(intermediate_file)
         os.remove(final_audio_file)
         os.remove(final_mp3)
 
-    except subprocess.CalledProcessError as e:
-        st.error(f"FFmpeg processing failed: {e.stderr.decode()}")
     except Exception as e:
         st.error(f"An error occurred: {e}")
