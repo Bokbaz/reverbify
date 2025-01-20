@@ -1,5 +1,5 @@
 pydub
-librosa
+librosa==0.8.0
 soundfile
 numpy
 streamlit
